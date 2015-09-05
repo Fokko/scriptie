@@ -1,0 +1,94 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+
+\documentclass{harvard-thesis}
+
+\usepackage{float}
+\usepackage{amssymb}
+\usepackage{pifont}
+\usepackage{url}
+
+\usepackage[english]{babel}
+
+\usepackage{geometry}
+\usepackage{pdflscape}
+\usepackage{booktabs}
+
+
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\usepackage{adjustbox}
+\usepackage{array}
+
+\usepackage{amsfonts}
+
+\usepackage{minted}
+\usepackage{etoolbox}
+\AtBeginEnvironment{minted}{\singlespacing%
+    \fontsize{9}{9}\selectfont}
+    
+\newcolumntype{R}[2]{%
+    >{\adjustbox{angle=#1,lap=\width-(#2)}\bgroup}%
+    l%
+    <{\egroup}%
+}
+\newcommand*\rot{\multicolumn{1}{R{45}{1em}}}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning,shadows,trees}
+\tikzset{
+  basic/.style  = {draw, text width=5cm, drop shadow, font=\sffamily, rectangle},
+  root/.style   = {basic, rounded corners=2pt, thin, align=center, fill=green!30},
+  level 2/.style = {basic, rounded corners=6pt, thin,align=center, fill=green!60, text width=8em},
+  level 3/.style = {basic, thin, align=left, fill=pink!60, text width=6.5em,font=\small}
+}
+
+
+\newtheorem{research-question}{Research question}
+\newtheorem{research-sub-question}{Research sub-question}
+
+\begin{document}
+
+% New definition of square root:
+% it renames \sqrt as \oldsqrt
+\let\oldsqrt\sqrt
+% it defines the new \sqrt in terms of the old one
+\def\sqrt{\mathpalette\DHLhksqrt}
+\def\DHLhksqrt#1#2{%
+\setbox0=\hbox{$#1\oldsqrt{#2\,}$}\dimen0=\ht0
+\advance\dimen0-0.2\ht0
+\setbox2=\hbox{\vrule height\ht0 depth -\dimen0}%
+{\box0\lower0.4pt\box2}}
+
+% the front matter
+\input{frontmatter/coverpage}
+\maketitle
+\copyrightpage
+\abstractpage
+\tableofcontents
+%\authorlist
+\listoffigures
+\dedicationpage
+\acknowledgments
+
+\onehalfspacing
+
+% incluude each chapter...
+\include{chapters/chapter1}
+\include{chapters/chapter2}
+\include{chapters/chapter3}
+\include{chapters/chapter4}
+\include{chapters/chapter5}
+\include{chapters/chapter6}
+
+\singlespacing
+
+% the back matter
+\clearpage
+\bibliography{references}
+\addcontentsline{toc}{chapter}{References}
+\bibliographystyle{plainnat}
+\include{endmatter/colophon}
+
+\end{document}
