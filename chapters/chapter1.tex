@@ -2,7 +2,7 @@
 Als ik zou willen dat je het begreep, had ik het wel beter uitgelegd. \qauthor{Johan Cruijff} 
 \end{savequote}
 
-\chapter{Introduction}
+\chapter{Introduction \label{chap1:introduction}}
 
 As from the $17^{\text{th}}$ century: ``Whoever knows the ways of Nature will more easily notice her deviations; and, on the other hand, whoever knows her deviations will more accurately describe her ways'' \cite{bacon2010novum}. This statements illustrates that uncovering outliers is historically a concept that interested people. The aim of the thesis is to explore techniques of detecting outliers from large and complex data sets produced by today's data-driven society by the use of modern web-scale techniques.
 
@@ -67,7 +67,7 @@ Which general-purpose outlier detection algorithms can potentially be scaled out
 Scaling an algorithm out, or sometimes referred as scaling horizontally, is distributing the workload of the algorithm across different machines which will act as a single logical unit. The different methods of outlier detection needs examined to determine if it can be converted into a so called `embarrassingly parallel workload'. This requires the algorithm to be able to separate the problem into a number of parallel tasks which can be scheduled on a cluster of distributed machines.
 
 \begin{research-sub-question} 
-Which computational engines are appropriate for distributed outlier detection. \label{sub-req2}
+Which computational engines are appropriate for outlier detection in a big-data setting. \label{sub-req2}
 \end{research-sub-question}
 
 Recent years a variety of computational engines have been developed for developing distributed applications, mostly based on the MapReduce model \cite{Dean:2008:MSD:1327452.1327492}, such as Apache Hadoop\footnote{Apache Hadoop \url{http://wiki.apache.org/hadoop/HadoopMapReduce}}, Apache Spark \cite{Zaharia:2010:SCC:1863103.1863113}. Other frameworks, such as Apache Mahout\footnote{Apache Mahout \url{http://mahout.apache.org/}}, provide additional algorithms which run on top of computational engines. An overview will be given of available computational engines and their characteristics.

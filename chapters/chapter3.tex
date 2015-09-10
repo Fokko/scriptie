@@ -2,7 +2,7 @@
 Software is a great combination between artistry and engineering. \qauthor{Bill Gates} 
 \end{savequote}
 
-\chapter{Architecture \label{chap:architecture}}
+\chapter{Architecture \label{chap3:architecture}}
 
 This chapter describes the architecture on which the software is build and how its influence on the results. Figure \ref{fig:architecture} illustrates using course-grained blocks the architecture. The arrows illustrate the data-flow through the system. 
 
@@ -84,7 +84,19 @@ The Spark Streaming library\footnote{Spark Streaming \url{http://spark.apache.or
 \caption{Spark streaming \label{fig:streaming}}
 \end{figure}
 
-By defining a window, for example, for example by a unit of time or per a fixed number of waiting messages. Each time the requirement is full-filled, a new job will be dispatched with as input the window. This streaming concept is particularly well suited using Apache Spark as the data-source.
+Enable micro-batched semantics on the continuous stream of observations is done by defining a window as illustrated in Figure \ref{fig:streamingWindow}\footnote{Spark Streaming Guide \url{http://spark.apache.org/docs/latest/streaming-programming-guide.html}}. The window is defined by two parameters:
+\begin{description}
+  \item[Window length] duration of the window.
+  \item[Sliding interval] interval at which the window operation is performed.
+\end{description}
+
+\begin{figure}[ht!]
+\centering
+\includegraphics[width=.9\textwidth]{figures/window.png}
+\caption{Applying windowing functions \label{fig:streamingWindow}}
+\end{figure}
+
+Each time the requirement is full-filled, a new job will be dispatched with as input the window. This streaming concept is particularly well suited using Apache Kafka as the data-source because it acts as a message queue.
 
 \section{Apache Kafka \label{subsec_kafka}}
 
