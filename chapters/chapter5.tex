@@ -3,9 +3,9 @@ Nulla facilisi. In vel sem. Morbi id urna in diam dignissim feugiat. Proin moles
 \qauthor{Quoteauthor Lastname} 
 \end{savequote}
 
-\chapter{Results \label{chap:results}}
+\chapter{Results \label{chap5:results}}
 
-This chapter will present the quantitative results of the algorithm given in Chapter \ref{chap:algorithm} on the software stack as presented in Chapter \ref{chap:architecture}. First, Section \ref{sec:dataset} shows the data used for producing the results. Second, in Section \ref{sec:hardware} the hardware is presented on which the software stack runs. Finally, in Section \ref{sec:results} the tests and the results will be presented.
+This chapter will present the quantitative results of the algorithm given in Chapter \ref{chap4:algorithm} on the software stack as presented in Chapter \ref{chap3:architecture}. First, Section \ref{sec:dataset} shows the data used for producing the results. Second, in Section \ref{sec:hardware} the hardware is presented on which the software stack runs. Finally, in Section \ref{sec:results} the tests and the results will be presented.
 
 The purpose of this section is to perform empirical to explore the scalability of the algorithm based on input sets.
 
@@ -71,10 +71,10 @@ We observe that the number execution time decreases until $\text{workers} = 5$, 
 
 The shuffle-stages of Apache Spark as introduced in Subsection \ref{subsec_spark} has major impact on the performance. Especially under big data workloads, this is a known problem \cite{Chen:2009:UTI:1592681.1592693}. At a data-shuffle the RDD which is scattered across different machines is distributed from many to many machines. 
 
-Even though moving data is expensive, sometimes it is necessary. For example, certain stages need to consolidate data on a single machine so that it can be co-located in memory. The algorithm as proposed in Section \ref{sec:sos} contains two shuffle stages at:
+Even though moving data is expensive, sometimes it is necessary. For example, certain stages need to consolidate data on a single machine so that it can be co-located in memory to perform computations for the next stage. The algorithm as proposed in Section \ref{sec:sos} contains two shuffle stages at:
 \begin{description}
-  \item[Distance matrix] At the first step, described in Subsection \ref{subsec:distancematrix}, the Cartesian product is taken to construct the distance matrix.
-  \item[Outlier probabilities] The last step takes the product of the matrix, as described in Subsection \ref{subsec:outlierprobabilities}. As all the rows of the matrix are distributed across the different nodes, this requires a shuffle to transfer each row to a single machine to compute the final result.
+  \item[Distance matrix] At the first step, described in Subsection \ref{subsec:distancematrix}, the Cartesian product of the vector input is taken to construct the distance matrix between all pairs.
+  \item[Outlier probabilities] The last step takes the product of the matrix, as described in Subsection \ref{subsec:outlierprobabilities}. As all the rows of the matrix are distributed across the different nodes, this requires a shuffle to transfer each row to a single machine to compute the final result. This stage does also include the binary search to find the affinity for each row, as described in Subsection \ref{subsec:affinity}.
 \end{description}
 
 The Cartesian product is first computed using the \texttt{cartesian} primitive which returns all the pairs of vectors. Then the \texttt{flatmap} primitive is used to compute the distances and remove the diagonal as it does not hold any information. Last, using \texttt{combineByKey} is used to reduce the pairs to a RDD of vectors which contain the distance from one to the other observations.

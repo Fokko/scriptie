@@ -2,10 +2,10 @@
 Building things - because they needed to be built. \qauthor{Johan Basse Bergqvist} 
 \end{savequote}
 
-\chapter{Background}
-This chapter will provide insights of the background from the literature on both outlier detection in Section \ref{sec:outlier} and web-scale techniques in Section \ref{sec:webscale}.
+\chapter{Background \label{chap2:background}}
+This chapter will provide insights of the background from the literature on both outlier detection in Section \ref{sec2:outlier} and web-scale techniques in Section \ref{sec2:webscale}.
 
-\section{Outlier detection algorithms \label{sec:outlier}}
+\section{Outlier detection algorithms \label{sec2:outlier}}
 Outlier detection algorithms aim to automatically identify those valuable or disturbing observations in large collections of data. First we identify the different classes of knowledge discovery algorithms \cite{Fayyad:1996:DMK:257938.257942}, which is also applicable to outlier detection algorithms:
 
 \paragraph{Unsupervised} algorithms try to find a hidden structure or pattern within a set of unlabeled observations. Figure \ref{fig:unsupervised} illustrates this, the observations given to the algorithm are unlabeled so no assumptions can be made. At the example, clustering, which is a classical unsupervised task, is applied on the set of observations. The output of the algorithm is reduced to clusters and can be manually reviewed. One of the difficulties is that it is often hard to evaluate performance of such algorithms as there is no clear error-function. In the case of clustering, it is not clear how many clusters are hidden in the data. In the case of outlier detection, it will compare the observations based on similarity.
@@ -91,7 +91,7 @@ The use of high-dimensional data depends on the context and cannot be generalize
 
 %Another option is to reduce the number of dimensionality which is converting data of high dimensionality into data of much lower dimensionality such that each of the lower dimensions convey much information. Typical techniques are Principal Component Analysis, Factor analysis, etc \cite{citeulike:5467879}.
 
-\section{Web-scale computing \label{sec:webscale}}
+\section{Web-scale computing \label{sec2:webscale}}
 
 To allow the system to scale which is require to cope with increasing workload and gives the ability to process large amounts of data, web-scale technology is adopted. This typically involves the ability to seamlessly provision and add resources to the distributed computing environment. Web-scale is often associated with the infrastructure required to run large distributed applications such as Facebook, Google, Twitter, LinkedIn, etc. 
 
