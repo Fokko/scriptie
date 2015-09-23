@@ -1,11 +1,10 @@
 \begin{savequote}[75mm] 
-Nulla facilisi. In vel sem. Morbi id urna in diam dignissim feugiat. Proin molestie tortor eu velit. Aliquam erat volutpat. Nullam ultrices, diam tempus vulputate egestas, eros pede varius leo.
-\qauthor{Quoteauthor Lastname} 
+Talk is cheap. Show me the code. \qauthor{Linus Torvalds} 
 \end{savequote}
 
-\chapter{Algorithm \label{chap:algorithm}}
+\chapter{Algorithm \label{chap4:algorithm}}
 
-This chapter will introduce and differentiate two types of algorithms which have been evaluated from the literature in Section \ref{sec:outlier}. Algorithms presented in Table \ref{tbl:overviewAlgorithms} are distance based algorithms, for simplicity we use Euclidean distance as in Equation \ref{eq:euclidean}, but all algorithm will also work with other metrics. For example, other metrics such as the Hamming distance, used for finding the number of different symbols in strings of equal length which is often used for comparing bit-sequences \cite{citeulike:1667687}. Another distance-function can be the Levenshtein distance which is used for comparing different text. The Euclidean distance between observation $a$ and $b$ is the length of the line segment connecting them and therefore intuitive for people to grasp \cite{Deza2009EncyclopediaofDistances}.
+This chapter will introduce and differentiate two types of algorithms which have been evaluated from the literature in Section \ref{sec2:outlier}. Algorithms presented in Table \ref{tbl:overviewAlgorithms} are distance based algorithms, for simplicity we use Euclidean distance as in Equation \ref{eq:euclidean}, but all algorithm will also work with other metrics. For example, other metrics such as the Hamming distance, used for finding the number of different symbols in strings of equal length which is often used for comparing bit-sequences \cite{citeulike:1667687}. Another distance-function can be the Levenshtein distance which is used for comparing different text. The Euclidean distance between observation $a$ and $b$ is the length of the line segment connecting them and therefore intuitive for people to grasp \cite{Deza2009EncyclopediaofDistances}.
 
 \begin{equation}
 d({\bf a},{\bf b}) = \sqrt{\sum^{m}_{i=1} (a_{i} - b_{i})^2} \label{eq:euclidean}
