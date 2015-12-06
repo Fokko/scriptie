@@ -4,19 +4,19 @@ Talk is cheap. Show me the code. \qauthor{Linus Torvalds}
 
 \chapter{Algorithm \label{chap4:algorithm}}
 
-This chapter will introduce and differentiate between two types of algorithms that have been evaluated from the literature in Section \ref{sec2:outlier}. The algorithms presented in Table \ref{tbl:overviewAlgorithms} are distance based algorithms. For simplicity we use Euclidean distance, as in Equation \ref{eq:euclidean}, but all algorithms will also work with other metrics. For example, metrics such as the Hamming distance, which can find the number of different symbols in strings of equal length and which is often used for comparing bit-sequences \cite{citeulike:1667687}. Another distance-function is the Levenshtein distance, which is used for comparing different text. The Euclidean distance between observation $a$ and $b$ is the length of the line segment connecting them, and is therefore intuitive for people to grasp \cite{Deza2009EncyclopediaofDistances}.
+This chapter introduces and differentiates between two types of algorithms that have been evaluated from the literature in Section \ref{sec2:outlier}. The algorithms presented in Table \ref{tbl:overviewAlgorithms} are distance based algorithms. For simplicity we use Euclidean distance, as in Equation \ref{eq:euclidean}, but all algorithms also work with other metrics. For example, metrics such as the Hamming distance, which can find the number of different symbols in strings of equal length and which is often used for comparing bit-sequences \cite{citeulike:1667687}. Another distance-function is the Levenshtein distance, which is used for comparing different strings of text. The Euclidean distance between observation $a$ and $b$ is the length of the line segment connecting them, and is therefore intuitive for people to grasp \cite{Deza2009EncyclopediaofDistances}.
 
 \begin{equation}
 d({\bf a},{\bf b}) = \sqrt{\sum^{m}_{i=1} (a_{i} - b_{i})^2} \label{eq:euclidean}
 \end{equation}
 
-The distance-based algorithm is related to the concept of clustering. An outlier can be seen as an observation which is not part of a cluster. Also, the algorithms take the locality into account. For example, for the Local Outlier Factor algorithm, which compares the density of the surrounding neighbours, it is important to note that the global density may vary a lot accross the feature space.
+The distance-based algorithm is related to the concept of clustering. An outlier can be seen as an observation which is not part of a cluster. Also, the algorithms take the locality into account. For example, for the Local Outlier Factor (LOF) algorithm, which compares the density of the surrounding neighbours, it is important to note that the global density may vary a lot across the feature space. Section \ref{sec:lof} introduces the Local Outlier Factor algorithm, which introduces the concept of local densities and which has been extended and adapted by many papers. This algorithm gives a good idea what outlier detection is about. Next, the Stochastic Outlier Selection (SOS) algorithm is introduced in Section \ref{sec:sos} and it elaborates on why it is a good fit for Apache Spark and LOF is not.
 
-Section \ref{sec:lof} will introduce the Local Outlier Factor algorithm, which introduces the concept of local densities and which has been extended and adapted by many papers. Next, the Stochastic Outlier Selection algorithm will be introduced in Section \ref{sec:sos} and it will be explained why it is a good fit for Apache Spark and its implementation.
+For outlier detection algorithms, there is no free lunch \cite{Wolpert95nofree}, which implies that there is no algorithm which outperforms all other algorithms \cite{outlierselection}. Different algorithms excel under different conditions, depending on the characteristics of the data set.
 
 \section{Local Outlier Factor \label{sec:lof}}
 
-Many distance-based outlier detection algorithms are based or strongly inspired by the Local Outlier Factor algorithm. The concept is depicted in Figure \ref{fig:lof}, where the black dots are the observations in the feature space and the dashed circles are the corresponding distances to the $k^{\text{th}}$-point which is set to $k=3$.
+Many distance-based outlier detection algorithms are based or strongly inspired by the Local Outlier Factor algorithm. The concept is depicted in Figure \ref{fig:lof}, where the black dots are the observations in the feature space and the dashed circles are the corresponding distances to the $k^{\text{th}}$-observation which is set to $k=3$.
 
 \begin{figure}[ht!]
 \centering
@@ -24,35 +24,30 @@ Many distance-based outlier detection algorithms are based or strongly inspired 
 \caption{Local Outlier Factor with $k=3$. \label{fig:lof}}
 \end{figure}
 
-First, the distance to the $k^{\text{th}}$-nearest observations will be computed. This is called the Local Reachability Distance (LDR), as defined in Equation \ref{eq:reachability}, where $k\text{-distance}(A)$ is the distance to the $k^{\text{th}}$-nearest observation of the neighbouring observation $A$. 
+First, the distance to the $k^{\text{th}}$-nearest observations is computed. This is called the Local Reachability Distance (LDR), as defined in Equation \ref{eq:reachability}, where $k\text{-distance}(A)$ is the distance to the $k^{\text{th}}$-nearest observation of the neighbouring observation $A$. 
 
 \begin{equation}
 \text{LDR}_{k}(A) = 1 / \left( \frac{\sum_{B \in N_{k}(A)} max(k\text{-distance}(B), d(A,B))}{|N_{k}(A)|} \right) \label{eq:reachability}
 \end{equation}
 
-After computing LDR for each point, which requires the $k$-nearest neighbours and the $k$-nearest neighbors of the $k$-nearest neighbors, the Local Outlier Factor (LOF) can be obtained using Equation \ref{eq:lof}, which essentially compares the local densities of the different observations.
+After computing LDR for each observation, which requires the $k$-nearest neighbours and the $k$-nearest neighbors of the $k$-nearest neighbors, the Local Outlier Factor value can be obtained using Equation \ref{eq:lof}, which essentially compares the density of the observation itself with the density of the surrounding observations.
 
 \begin{equation}
 \text{LOF}_{k}(A) = \left( \frac{\sum_{B \in N_{k}(A)} \text{LDR}(B)}{|N_{k}(A)|} \right) / \text{LDR}(A)
 \label{eq:lof}
 \end{equation}
 
-The algorithm relies heavily on nearest-neighbour searches which are hard to optimize on distributed computational platforms as they require searching through and sort all the data.
-
-As for outlier detection algorithms, there is no free lunch \cite{Wolpert95nofree}, which implies that there is no algorithm which outperforms all other algorithms \cite{outlierselection}. Different algorithms excel under different conditions, depending on data characteristics.
+The algorithm relies heavily on nearest-neighbour searches which are hard to optimize on distributed computational platforms as they require searching through and sort all the data. Therefore the algorithm is not suitable to implement on top of Apache Spark.
 
 \section{Stochastic Outlier Selection \label{sec:sos}}
 
-The implementation of the Stochastic Outlier Selection algorithm has been done in Scala\footnote{Scala programming language \url{http://www.scala-lang.org/}} on top of Apache Spark.
-
 Instead of comparing local densities, as done by the Local Outlier Factor concept, the Stochastic Outlier Selection algorithm employs the concept of affinity which does comes from the field of \cite{ictdbid:2777,AISTATS09_Maaten}:
-
 \begin{description}
-  \item[Clustering] employs affinity to quantify the relationships among data observations \cite{Frey2007}. For example, the concept of affinity been used for partitioning protein interactions \cite{pmid19331680} and clustering text \cite{10.1109/TKDE.2010.144}.
+  \item[Clustering] employs affinity to quantify the relationships among observations \cite{Frey2007}. For example, the concept of affinity been used for partitioning protein interactions \cite{pmid19331680} and clustering text \cite{10.1109/TKDE.2010.144}.
   \item[Dimensionality reduction] Stochastic Neighbor Embedding \cite{NIPS20022276} or t-distributed Stochastic Neighbor Embedding \cite{van2008visualizing,ictdbid:2777} is a nonlinear dimensionality reduction technique for embedding high-dimensional data into a space of two or three dimensions. The technique has been used among music analysis \cite{Hamel+al:2010} and bio-informatics \cite{journals/bioinformatics/WallachL09}.
 \end{description}
 
-To determine the correct working of the algorithm, unit-tests have been written in order to ensure correct output in each stage in the algorithm. The output of the implementation is compared to the output generated by the Python implementation written by the author\footnote{SOS \url{https://github.com/jeroenjanssens/sos/blob/master/bin/sos/}}. These unit-tests uncovered a bug in the authors' script, which has been patched by a pull request\footnote{Github pull request \url{https://github.com/jeroenjanssens/sos/pull/4/}}.
+The implementation of the Stochastic Outlier Selection algorithm has been done in Scala\footnote{Scala programming language \url{http://www.scala-lang.org/}} on top of Apache Spark. To determine the correct working of the algorithm, unit-tests have been written in order to ensure correct output in each stage in the algorithm. The output of the implementation is compared to the output generated by the Python implementation written by the author\footnote{SOS \url{https://github.com/jeroenjanssens/sos/blob/master/bin/sos/}}. These unit-tests uncovered a bug in the authors' script, which has been patched by submitting a pull request\footnote{Github pull request \url{https://github.com/jeroenjanssens/sos/pull/4/}}.
 
 The algorithm consists of a series of transformations on the data as described in the original paper \cite{MSU:CSE:00:2}. These steps are elaborated in the following subsections, which describe how they are implemented.
 
@@ -82,17 +77,17 @@ def computeDistanceMatrixPair(data: RDD[(Long, Array[Double])]):
 \label{list:matrixDistance}
 \end{listing}
 
-The implementation given in Listing \ref{list:matrixDistance} takes the Cartesian product of the input vectors to compute every pair's distance. Next, the pairs are mapped to compute the Euclidean distance between every pair of vectors except to itself, as this does not carry any information for the algorithm. Finally, all the vectors are combined by the unique key of each vector returning the rows of the matrix.
+The implementation given in Listing \ref{list:matrixDistance} takes the Cartesian product of the input vectors to compute the distance between ever pair of observations. Next, the pairs are mapped to compute the Euclidean distance between every pair of vectors except to itself, as this does not carry any information and is not used by the algorithm. Finally, all the vectors are combined by the unique key of each vector returning the rows of the matrix.
 
 \subsection{Affinity matrix \label{subsec:affinity}}
-The affinity matrix will be obtained by transforming the distance matrix proportionally to the distance between two data observations. The affinity quantifies the relationship from one data point to another. The affinity $\sigma_{i}$ for each point is found by performing a binary search, which makes the entropy of the distribution between overall neighbors equal to the logarithm of the perplexity parameter $h$.
+The affinity matrix is obtained by transforming the distance matrix proportionally to the distance between two observations. The affinity quantifies the relationship from one observation to another. The affinity $\sigma_{i}$ for each observation is found by performing a binary search, which makes the entropy of the distribution between overall neighbors equal to the logarithm of the perplexity parameter $h$.
 
 \begin{equation}
 a_{ij} = \begin{cases} \exp(-d_{ij}^{2} / 2 \sigma_{i}^{2}) & \text{if } i \neq j\\ 0 & \text{if } i = j \end{cases}
 \label{eq:affinity}
 \end{equation}
 
-The perplexity parameter is the only configurable parameter of the algorithm denoted by $h$ as in Equation \ref{eq:perplexity}. The influence of the $h$ parameter is comparable to the $k$ parameter in the $k$-nearest neighbours (KNN). It alters the behaviour of the algorithm analogously: the higher the value $h$, the more it will depend on the surrounding neighbours. One important difference is that $h \in \mathbb{R}$ and $k \in \mathbb{N}$. The perplexity value has a deep foundation in information theory, but in practice should it be tuned by the domain expert to provide a good level of outlierness \cite{MSU:CSE:00:2}.
+The perplexity parameter is the only configurable parameter of the algorithm denoted by $h$ as in Equation \ref{eq:perplexity}. The influence of the $h$ parameter is comparable to the $k$ parameter in the $k$-nearest neighbours algorithm. It also alters the behaviour of the algorithm analogously: the higher the value $h$, the more it depends on the surrounding neighbours. One important difference is that $h \in \mathbb{R}$ and $k \in \mathbb{N}$. The perplexity value has a deep foundation in information theory, but in practice should it be tuned by the domain expert to provide a good level of outlierness \cite{MSU:CSE:00:2}.
 
 \begin{listing}[ht!]
 \begin{minted}[frame=lines]{scala}
@@ -106,16 +101,14 @@ def computeAffinityMatrix(dMatrix: RDD[(Long, Array[Double])],
 \label{list:matrixAffinity}
 \end{listing}
 
-Listing \ref{list:matrixAffinity} invokes the binary search which approximates the affinity based on each row within the matrix. The maximum number of iterations can be set in order to interrupt the execution at some point. Also, a tolerance can be set to accept a small error in exchange for reduced computational time.
+Listing \ref{list:matrixAffinity} applies the binary search on each row within the matrix which approximates the affinity. The maximum number of iterations in the binary search can be limited in order to interrupt the execution which will introduce some error, but will reduce the computational time. Similar, an accepted tolerance can be set to accept a small error in exchange for reduced computational time. The binary search iteratively bisects the interval and then selects the correct upper of lower half until the desired variances for each observation is found.
 
 \begin{equation}
 h = \{x \in \mathbb{R} | 1 \leq x \leq n-1\}
 \label{eq:perplexity}
 \end{equation}
 
-
-
-The affinity matrix is obtained by applying Equation \ref{eq:affinity} on every element of the distance matrix. Perplexity is employed to adaptively set the variances which are computed using a search, so that every point has effectively $h$ neighbours \cite{NIPS20022276}. Assuming that each point has a unique place in space, for each point the standard deviation value $\sigma^{2}$ has to be approximated. The values of the variances that correspond to the desired perplexity are found using a binary search. The binary search iteratively bisects the interval and then selects the correct upper of lower half until the desired variances for each data point are found.
+The affinity matrix is obtained by applying Equation \ref{eq:affinity} on every element of the distance matrix. Perplexity is employed to adaptively set the variances which are computed using the introduced binary search, which approximates for every value the $\sigma^{2}$ so that every observation has effectively $h$ neighbours \cite{NIPS20022276}. This has to be done for every observation assuming that it has a unique place in space. 
 
 \begin{listing}[ht!]
 \begin{minted}[frame=lines]{scala}
@@ -158,13 +151,11 @@ def binarySearch(affinity: DenseVector[Double],
     newAffinity
 }
 \end{minted}
-\caption{Performing a binary search to approximate the affinity for each point.}
+\caption{Performing a binary search to approximate the affinity for each observation.}
 \label{list:approximateAffinity}
 \end{listing}
 
 Listing \ref{list:approximateAffinity} shows the recursive function used to find or approximate the perplexity of each row $x_{i}$ in the distance matrix. The recursive function eliminates mutable variables which are impossible to avoid when using using loops. The use of immutable variables comes from the functional programming aspect of Scala and makes the code less error-prone.
-
-Another setting of the search is a predefined tolerance at which the search will stop when the remaining error is within a certain range. This setting will introduce some error and therefore decrease precision, but can help to reduce the computational time. The remaining error gets halved on each iteration, therefore the last few iterations have little influence on the final result. When execution time is an important factor, a small tolerance can be introduced.
 
 \subsection{Binding probability matrix \label{subsec:bindingprob}}
 
@@ -175,7 +166,7 @@ b_{ij} = \frac{a_{ij}}{\sum_{k=1}^{n}a_{ik}}
 \label{eq:binding}
 \end{equation}
 
-The binding probability matrix can be applied by normalizing the affinity matrix such that $\sum_{k=1}^{n}$ sums up to $1$. Equation \ref{eq:binding} will transform the affinity matrix to the probability outlier matrix.
+The binding probability matrix can be applied by normalizing the affinity matrix such that $\sum_{k=1}^{n}$ sums up to $1$. Equation \ref{eq:binding} transforms the affinity matrix to the probability outlier matrix.
 
 \begin{listing}[ht!]
 \begin{minted}[frame=lines]{scala}
@@ -198,7 +189,7 @@ The last step is to compute the outlier probability of vector ${\bf x}_{i}$, whi
 f{_\text{SOS}}({\bf x}_{i}) \equiv \prod^{n}_{\substack{i=1\\j \neq i}}(1-b_{ji}) \label{eq:final}
 \end{equation}
 
-The implementation is given in Listing \ref{list:matrixOutput}. The implementation uses a \texttt{flatmap} to add indices to the elements of the vector. The inline if-condition will offset the indices by one to skip the diagonal of the matrix. Important to note is the \texttt{zipWithIndex} operation is applied to the local collection and not on the RDD which would trigger an expensive Spark job.
+The implementation is given in Listing \ref{list:matrixOutput}. The implementation uses a \texttt{flatmap} to add indices to the elements of the vector. The inline if-condition offsets the indices by one to skip the diagonal of the matrix. Important to note is the \texttt{zipWithIndex} operation is applied to the local collection and not on the RDD which would trigger a subsequent Spark job.
 
 \begin{listing}[ht!]
 \begin{minted}[frame=lines]{scala}
@@ -212,4 +203,4 @@ def computeOutlierProbability(rows: RDD[(Long, Array[Double])]):
 \label{list:matrixOutput}
 \end{listing}
 
-Finally the \texttt{foldByKey} will group all the keys and perform a fold which will compute the product of each column. This last action will invoke a data-shuffle, as the rows are distributed across the different worker nodes.
+Finally the \texttt{foldByKey} groups all the keys and perform a fold which computes the product of each column. This last action invokes a data-shuffle, as the rows are distributed across the different worker nodes. The product represents the outlierness of each observation.

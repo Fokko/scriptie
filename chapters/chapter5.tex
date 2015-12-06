@@ -1,23 +1,19 @@
 \begin{savequote}[75mm] 
-Nulla facilisi. In vel sem. Morbi id urna in diam dignissim feugiat. Proin molestie tortor eu velit. Aliquam erat volutpat. Nullam ultrices, diam tempus vulputate egestas, eros pede varius leo.
-\qauthor{Quoteauthor Lastname} 
+Computers are useless. They can only give you answers. \qauthor{Pablo Picasso} 
 \end{savequote}
 
 \chapter{Results \label{chap5:results}}
 
-This chapter will present the quantitative results of the algorithm described in Chapter \ref{chap4:algorithm} on the software stack presented in Chapter \ref{chap3:architecture}. First, Section \ref{sec:dataset} shows the data used for producing the results. Second, in Section \ref{sec:hardware} the hardware is presented on which the software stack runs. Finally, in Section \ref{sec:results} the tests and the results are presented.
+The purpose of this chapter is to empirically explore the scalability of the algorithm and architecture compared to different input sets. The quantitative results are presented using the algorithm as described in Section \ref{sec:sos} and the architecture as presented in Chapter \ref{chap3:architecture}. First, Section \ref{sec:dataset} explains how the input data is generated. Second, the hardware is presented in Section \ref{sec:hardware} on which the tests are executed. Finally, in Section \ref{sec:results} the tests and the results are presented and evaluated.
 
-The purpose of this section is to empirically explore the scalability of the algorithm based on input sets.
-
-\section{Data-set \label{sec:dataset}}
-
-The dataset is a synthetic one which is generated beforehand. The input of the algorithm is a $m$ dimensional vector as in Equation \ref{featureVector}.
+\section{Dataset \label{sec:dataset}}
+The dataset is generated beforehand. The input of the algorithm is a $m=10$ dimensional vector as in Equation \ref{featureVector}. The value of each feature vector is sampled in a pseudo-random fashion from a Gaussian distribution (also known as the normal distribution), shown in Figure \ref{gaussianDistribution}. The main characteristic of this distribution is that when given a theoretical infinite number of samples, approximately $68.2\%$ of the sampled values are within the $\pm 1$ standard deviation.
 
 \begin{equation}
 \textbf{x} = [x_{1},\ldots,x_{m}] \in \mathbb{R}^{m} \label{featureVector}
 \end{equation}
 
-The value of each feature vector is sampled in a pseudo-random fashion from a Gaussian distribution (also known as the normal distribution), shown in Figure \ref{gaussianDistribution}. The main characteristic of this distribution is that when given a theoretical infinite number of samples, approximately $68.2\%$ of the sampled values are within the $\pm 1$ standard deviation.
+This results in a dataset where the number of outliers is limited as the mean of all the observations in the feature space is at the origin. This is not a problem as the goal is to determine the scalability of the algorithm and not its performance in determining if the observation is an outlier or not.
 
 \begin{figure}[ht!]
 \centering
@@ -25,21 +21,16 @@ The value of each feature vector is sampled in a pseudo-random fashion from a Ga
 \caption[Standard normal distribution]{The curve from which the feature vectors are sampled. The vertical axis is the probability. The $\sigma$ values depict the standard deviations. \label{gaussianDistribution}}
 \end{figure}
 
-This will result in a dataset where the number of outliers will be limited as the mean of all the observations in the feature space will be at the origin. This will be not a problem as the goal is to determine the scalability of the algorithm and not its performance in determining if the observation is an outlier or not.
-
 \section{Hardware \label{sec:hardware}}
-This section will describe the hardware which is used to run the tests. Docker will provide an abstract interface which allows us to run the stack on homogeneous resources. Nevertheless the hardware will impact the actual performance, therefore is it important to describe the hardware: to create an isolated environment which is not affected by other processes running on the physical hardware, a dedicated server has been assigned for running the tests. Quintors' local Dell PowerEdge T620 development-server `Big-Willem' has been assigned for running the algorithm and for producing the results. Big-Willem has two Intel Xeon cpu's with six cores each supporting Hyper-threading, thus providing 24 logical cores in total. The main memory consists of 128 gigabytes in total. 
-
-The virtual machine runs on 16 cores, has 64 gigabytes of memory assigned to it and is fully dedicated to running the software stack.
+This section describes the hardware which is used to run the tests. Docker provides an abstract interface which allows us to run the stack on a set of homogeneous resources. Nevertheless the hardware impacts the actual performance, therefore is it important to describe the hardware which is essential to repreduce the same numbers. To create an isolated environment which is not affected by other processes running on the physical hardware, a dedicated server has been assigned. Quintors' local Dell PowerEdge T620 development-server `Big-Willem' has been assigned for running the algorithm and for producing the results. Big-Willem has two Intel Xeon cpu's with six cores each supporting Hyper-threading, thus providing 24 logical cores in total. The main memory consists of 128 gigabytes in total. The virtual machine runs on 16 cores, has 64 gigabytes of memory assigned to it and is fully dedicated to running the software stack.
 
 \section{Results \label{sec:results}}
 
-First, the general execution time as a function of the input size is analyzed in Subsection \ref{subsec:executionTime}. Second, the effect of adding additional workers to the Spark cluster on the exection time is explored in Subsection \ref{subsec:parallelization}. This gives a good insight in the parallelizability of the algorithm. Finally, the stages of the algorithm are defined and insights are given regarding the execution time per stage in Subsection \ref{subsec:shuffle-behaviour}.
+First, the general execution time as a function of the input size is analyzed in Subsection \ref{subsec:executionTime}. Second, the impact on the execution time by adding additional workers to the Spark cluster is explored in Subsection \ref{subsec:parallelization}. This gives a good insight in the parallelizability of the algorithm. Finally, the stages of the algorithm are defined and insights are given regarding the execution time per stage in Subsection \ref{subsec:shuffle-behaviour}.
 
 \subsection{Execution time \label{subsec:executionTime}}
 
-The total execution time will provide insight of the execution time of the algorithm with a fixed number of resources. The number of observations will be doubled for each iteration starting from $500$ up to $64000$. Every iteration is performed five times to obtain averaged results.
-The execution time is given in seconds and is measured after the initialization of the Spark-cluster until the results of the distributed computation are returned to the driver.
+The total execution time provides insight of the execution time of the algorithm with a fixed number of resources. The number of observations is doubled for each iteration starting from $500$ up to $64 000$. Every iteration is performed five times to obtain stable results. The execution time is given in seconds and is measured after the initialization of the Spark-cluster until the results of the distributed computation are returned to the driver.
 
 \begin{figure}[ht!]
     \begin{center}
@@ -49,13 +40,13 @@ The execution time is given in seconds and is measured after the initialization 
     \end{center}
 \end{figure}
 
-In Figure \ref{fig:executiontime} we observe a quadratic increase in execution time, which is expected as the dominant computational complexity of the algorithm is $\mathcal{O}(n^{2})$ by taking the Cartesian product for computing the distance matrix in Subsection \ref{subsec:distancematrix}.
+In Figure \ref{fig:executiontime} we observe a quadratic increase in execution time, which is expected to be equal to the dominant computational complexity. In the case of the algorithm, the step of taking the Cartesian product for computing the distance matrix in Subsection \ref{subsec:distancematrix} is in order $\mathcal{O}(n^{2})$ and therefore the algorithm will perform analogous.
 
 \subsection{Parallelization \label{subsec:parallelization}}
 
-The purpose of this test is to determine the reduction of execution time by adding additional Spark workers to the cluster. Figure \ref{fig:parallelization} illustrates the execution time as a function of the number of workers.
+The purpose of this experiment is to determine the reduction of execution time by adding additional Spark workers to the cluster. Figure \ref{fig:parallelization} illustrates the execution time as a function of the number of workers.
 
-There will be a single Spark master and a single Apache Zookeeper instance. The number of workers defines the number of Kafka brokers and Spark workers. The number of Kafka nodes is equal to the number of Spark workers since when the number of workers increases, the number of partitions also needs to grow to parallelize the work. Therefore more brokers are desirable to divide the partitions over different brokers.
+A single Spark master and a single Apache Zookeeper instance is used. The number of Kafka nodes is equal to the number of Spark workers since when the number of workers increases, the number of partitions also needs to grow to parallelize the work and share the workload. Therefore more brokers are desirable to divide the partitions over different brokers. Each worker node within Apache Spark has 2 cores and 6 gigabytes of memory assigned.
 
 \begin{figure}[ht!]
     \begin{center}
@@ -65,25 +56,19 @@ There will be a single Spark master and a single Apache Zookeeper instance. The 
     \end{center}
 \end{figure}
 
-We observe that the execution time decreases until $\text{workers} = 5$, where the cluster works with 10 CPU's and 30 gigabytes of RAM. With the relatively small dataset of $n=2000$, the memory is not a resource constraint. As the machine features 12 physical cores and 24 logical cores, the number of ten cores assigned to Spark is optimal and the number of context-switches will be minimal while utilizing the most resources.
+We observe that the execution time decreases until $\text{workers} = 5$, where the cluster works with 10 CPU's and 30 gigabytes of memory. For the relative small dataset of $n=2000$, the memory of each worker is not a resource constraint. The bottleneck is the processing power, which increases significantly when adding more nodes to the cluster. As the machine features 12 physical cores and 24 logical cores, the number of 10 CPU cores assigned to Spark is optimal, leaving some power for the Spark Master, Zookeeper and Apache Kafka instances. When increasing the number of nodes the context-switches are becoming dominant, therefore the number of nodes has to be chosen precisely according to the available hardware for obtaining the best resource utilization.
 
 \subsection{Shuffle-behaviour \label{subsec:shuffle-behaviour}}
 
-The shuffle-stages of Apache Spark as introduced in Subsection \ref{subsec_spark} has a major impact on the performance. Especially under big data workloads, this is a known problem \cite{Chen:2009:UTI:1592681.1592693}. At a data-shuffle the RDD, which is scattered across different machines, is distributed from many to many machines. 
+The shuffle-stages of Apache Spark are introduced in Subsection \ref{subsec_spark} and are known for having a major impact on the performance. Especially when the job is data-intensive in particular \cite{Chen:2009:UTI:1592681.1592693}. At a data-shuffle the RDD, which is scattered across different machines, re-distribution of the data from many to many machines is required. 
 
-Even though moving data is expensive, sometimes it is necessary. For example, certain stages need to consolidate data on a single machine so that it can be co-located in memory to perform computations for the next stage. The algorithm, as proposed in Section \ref{sec:sos}, contains two shuffle stages at:
+Even though moving data is expensive, sometimes it is necessary. For example, certain stages need to consolidate data on a single machine so that it can be co-located in memory to perform computations for the next stage. The algorithm contains two shuffle stages at:
 \begin{description}
   \item[Distance matrix] At the first step, described in Subsection \ref{subsec:distancematrix}, the Cartesian product of the vector input is taken to construct the distance matrix between all pairs.
   \item[Outlier probabilities] The last step takes the product of the matrix, as described in Subsection \ref{subsec:outlierprobabilities}. As all the rows of the matrix are distributed across the different nodes. This requires a shuffle to transfer each row to a single machine to compute the final result. This stage does also includes the binary search to find the affinity for each row, as described in Subsection \ref{subsec:affinity}.
 \end{description}
 
-The Cartesian product is first computed using the \texttt{cartesian} primitive, which returns all the pairs of vectors. Then the \texttt{flatmap} primitive is used to compute the distances and remove the diagonal, as it does not hold any information. Last, using \texttt{combineByKey} is used to reduce the pairs to a RDD of vectors which contain the distance from one to another observations.
-
-The intermediate steps, transforming the distance matrix to the affinity matrix in Subsection \ref{subsec:affinity} and computing the binding probability matrix as described in Subsection \ref{subsec:bindingprob} can be done locally on each worker for each vector in the RDD.
-
-Lastly, the position of the value in the vector is assigned a key and the final result is computed using \texttt{foldLeft} which requires a shuffle as the rows of the matrix are local, and the columns are distributed across multiple machines.
-
-Using the Spark Event Log\footnote{Spark monitoring \url{http://spark.apache.org/docs/latest/monitoring.html}}, the time taken for each stage can be monitored. This information is helpful to obtain insights about the bottlenecks of the algorithm.
+The Cartesian product is first computed using the \texttt{cartesian} primitive, which returns all the pairs of vectors. Then the \texttt{flatmap} primitive is used to compute the distances and leaves out the diagonal as it does not hold any information. Last, using \texttt{combineByKey} is used to reduce the pairs to a RDD of vectors which contain the distance from one to another observations. The intermediate steps, transforming the distance matrix to the affinity matrix in Subsection \ref{subsec:affinity} and computing the binding probability matrix as described in Subsection \ref{subsec:bindingprob} can be done locally on each worker for each vector in the RDD. Lastly, the position of the value in the vector is assigned a key and the final result is computed using \texttt{foldLeft} which requires a shuffle as the rows of the matrix are local, and the columns are distributed across multiple machines. Using the Spark Event Log\footnote{Spark monitoring \url{http://spark.apache.org/docs/latest/monitoring.html}}, the time taken for each stage can be monitored. This information is helpful to obtain insights about the bottlenecks of the algorithm.
 
 \begin{table}[ht!]
 \makebox[\linewidth]{
@@ -91,7 +76,7 @@ Using the Spark Event Log\footnote{Spark monitoring \url{http://spark.apache.org
 
 \begin{tabular}{r|llll|llll|llll}
  ~ & \multicolumn{4}{c|}{$N=2400$} & \multicolumn{4}{c|}{$N=4800$} & \multicolumn{4}{c}{$N=9600$}\\
- ~ & Distance & Product & Collect & Sum & Distance & Product & Collect & Sum & Distance & Product & Collect & Sum \\ \hline
+ Stage & Distance & Product & Collect & Sum & Distance & Product & Collect & Sum & Distance & Product & Collect & Sum \\ \hline
  Run 1 & 114 & 90 & 6 & 210 & 258 & 330 & 6 & 594 & 900 & 1380 & 9 & 2289 \\
  Run 2 & 114 & 90 & 6 & 210 & 252 & 330 & 6 & 588 & 780 & 1380 & 12 & 2172 \\
  Run 3 & 114 & 90 & 6 & 210 & 258 & 330 & 6 & 594 & 900 & 1380 & 10 & 2290 \\
@@ -101,17 +86,16 @@ Using the Spark Event Log\footnote{Spark monitoring \url{http://spark.apache.org
  Run 7 & 126 & 84 & 6 & 216 & 252 & 330 & 6 & 588 & 1320 & 1380 & 12 & 2712 \\
  Run 8 & 144 & 90 & 6 & 240 & 276 & 402 & 5 & 683 & 960 & 1380 & 12 & 2352 \\
  Run 9 & 138 & 102 & 6 & 246 & 270 & 330 & 5 & 605 & 900 & 1380 & 11 & 2291 \\
- Run 10 & 114 & 102 & 5 & 221 & 258 & 342 & 6 & 606 & 960 & 1380 & 11 & 2351 \\
+ Run 10 & 114 & 102 & 5 & 221 & 258 & 342 & 6 & 606 & 960 & 1380 & 11 & 2351 \\ \hline
  Average & 120.00 & 93.00 & 5.9 & 218.9 & 5.7 & 345.6 & 264 & 615.3 & 1014 & 1380 & 10.5 & 2404.5 \\
  Std.dev & 12.00 & 6.48 & 0.32 & 13.32 & 0.48 & 29.96 & 10.2 & 35.31 & 170.76 & 0 & 1.43 & 177.56 \\ \hline
  Total & 42.49\% & 54.82\% & 2.70\% & ~ & 42.91\% & 56.17\% & 0.92\% & ~ & 42.17\% & 57.39\% & 0.43\% & ~ \\
 \end{tabular}
 }
-\caption[Execution time taken per stage]{Time taken for each stage of the algorithm execution. The distance column refers to the Cartesian product of the vectors to compute the distance-matrix. The product column refers to the shuffle required to consolidate each column of the matrix on a single worker. The collect column is the time taken to bring the results back to the driver. Everything is in seconds.}
+\caption[Execution time taken per stage]{Time taken for each stage of the algorithm execution. The distance column refers to the Cartesian product of the vectors to compute the distance-matrix. The product column refers to the shuffle required to consolidate each column of the matrix on a single worker. The collect column is the time taken to bring the results back to the driver. All numbers are in seconds.}
 
 \label{table:executionPerStage}
 
 \end{table}
 
 Table \ref{table:executionPerStage} provides insights in the execution time per stage. Each stage is delimited by a shuffle at which the different worker nodes in the cluster have to coordinate and transfer the data which is required for the next stage. We observe that the last stage, which entails the binary search and the shuffling of the columns, covers the majority of the execution time. At first glance the Cartesian product is likely to be the dominant factor, but the share of this stage decreases as the number of observations grows.
-

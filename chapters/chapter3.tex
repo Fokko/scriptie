@@ -3,7 +3,6 @@ Software is a great combination between artistry and engineering. \qauthor{Bill 
 \end{savequote}
 
 \chapter{Architecture \label{chap3:architecture}}
-
 This chapter describes the architecture on which the software is built and its influence on the results. Figure \ref{fig:architecture} illustrates the architecture using course-grained blocks. The arrows illustrate the dataflow through the system. 
 
 \begin{figure}[ht!]
@@ -13,7 +12,7 @@ This chapter describes the architecture on which the software is built and its i
 \label{fig:architecture}
 \end{figure}
 
-The emphasis of the architecture is on scalability. This means that it is simple to increase or decrease the number of worker nodes across a number of different physical machines as the machines are provisioned automatically, tending to implement or evolve to an `elastic architecture' \cite{9780470887998}, which autonomously adapts its capacity to a varying workload over time \cite{180145}, although the number of nodes is configured systematically to determine its performance for a set number of nodes. The underlying provisioning of the resources is done by Docker as described in section \ref{subsec_docker}. The input data on which the algorithm will perform the computations is kept on an Apache Kafka messaging system, as described in section \ref{subsec_kafka}. Finally, the computational framework itself, built upon Apache Spark, is discussed in Section \ref{subsec_spark}.
+The emphasis of the architecture is on scalability. This means that it is simple to increase or decrease the number of worker nodes across a number of different physical machines as the machines are provisioned automatically, tending to implement or evolve to an `elastic architecture' \cite{9780470887998}, which autonomously adapts its capacity to a varying workload over time \cite{180145}, although the number of nodes is configured systematically to determine its performance for a set number of nodes. The underlying provisioning of the resources is done by Docker as described in section \ref{subsec_docker}. The input data on which the algorithm performs the computations is kept on an Apache Kafka messaging system, as described in section \ref{subsec_kafka}. Finally, the computational framework itself, built upon Apache Spark, is discussed in Section \ref{subsec_spark}.
 
 \begin{figure}[ht!]
 \centering
@@ -22,11 +21,11 @@ The emphasis of the architecture is on scalability. This means that it is simple
 \label{fig:asf}
 \end{figure}
 
-Most of the software on which the architecture is built is part of the Apache Software Foundation\footnote{Apache Software Foundation \url{http://www.apache.org/}}, which is a decentralized community of developers across the world. The software produced is distributed under the terms of the Apache License and is therefore free and open source. The Apache projects are characterized by a collaborative, consensus-based development process and an open and pragmatic software license.
+The majority of the used software on which the architecture is built is part of the Apache Software Foundation\footnote{Apache Software Foundation \url{http://www.apache.org/}}, which is a decentralized community of developers across the world. The software produced is distributed under the terms of the Apache License and is therefore free and open source. The Apache projects are characterized by a collaborative, consensus-based development process and an open and pragmatic software license.
 
 \section{Docker \label{subsec_docker}}
 
-Docker is an open-source project that automates the deployment of applications inside software containers\footnote{Docker \url{https://www.docker.com/}}. Docker uses resource isolation features of the Linux kernel to allow independent containers to run within a single Linux instance, avoiding the overhead of starting and maintaining virtual machines. Building on top of the facilities provided by the Linux kernel, a Docker container, unlike a virtual machine, does not require or include a separate operating system. Docker also simplifies the creation and operation of task- or workload-queues and other distributed systems \cite{docker1,docker2}.
+Docker is an open-source project that automates the deployment of applications inside software containers\footnote{Docker \url{https://www.docker.com/}}. Docker uses resource isolation features of the Linux kernel to allow independent containers to run within a single Linux instance, avoiding the overhead of starting and maintaining virtual machines. A Docker container runs directly on top of the operating system, unlike a virtual machine, this does not require to run a separate operating system within the container. Docker also simplifies the creation and operation of task or workload queues and other distributed systems \cite{docker1,docker2}.
 
 \begin{figure}[ht!]
 \centering
@@ -36,16 +35,13 @@ Docker is an open-source project that automates the deployment of applications i
 
 Docker enables the encapsulation of different applications within lightweight-components which can easily be deployed on top of the docker daemon. This can be a single local docker-daemon or a distributed one across a pool of physical hosts. This enables deployment of the required components across a group of machines.
 
-The Docker architecture is strongly inspired by the Microservice architecture as depicted in Figure \ref{fig:microservice}, where each functionality is defined and encapsulated within its own container. Scaling such a system is done by adding or removing services. For example, if there is a computationally intensive task scheduled on Spark, more Docker-containers can be spawned on the pool of hosts to share the computational workload.
+The Docker architecture is strongly inspired by the Microservice architecture as depicted in Figure \ref{fig:microservice}, where each functionality is defined and encapsulated within its own container. Scaling such a system is done by adding or removing services (containers). For example, if there is a computationally intensive task scheduled on Spark, more Docker-containers can be spawned on the pool of hosts to devide the computational workload.
 
-The stack is defined using Docker Compose\footnote{Docker Compose \url{https://www.docker.com/compose/}}, which is the successor of Fig\footnote{Fig \url{http://www.fig.sh/}}. Docker Compose is a tool for defining multi-container applications in a single file. The application, with all its dependent containers, will be booted using a single command which does everything that needs to be done to get it running.
-
-At this moment Docker is used on a single machine, but it can transparently scale to multiple host to create a cluster using Docker Swarm\footnote{Docker Swarm \url{https://docs.docker.com/swarm/}}. 
-
+The stack is defined using Docker Compose\footnote{Docker Compose \url{https://www.docker.com/compose/}}, which is the successor of Fig\footnote{Fig \url{http://www.fig.sh/}}. Docker Compose is a tool for defining multi-container applications in a single file. The application, with all its dependent containers, is booted using a single command which does everything that needs to be done to get it running. At this moment Docker is used on a single machine, but it can transparently scale to multiple host to create a cluster using Docker Swarm\footnote{Docker Swarm \url{https://docs.docker.com/swarm/}}. 
 
 \section{Apache Spark \label{subsec_spark}}
 
-Apache Spark\footnote{Apache Spark \url{http://spark.apache.org/}} is a computational platform that is designed to be distributed, fast and general-purpose. It is an extension of the popular MapReduce model \cite{Dean:2008:MSD:1327452.1327492} and it is more efficient when it comes to iterative algorithms as it is able to performs in-memory computations \cite{Xin:2013:SSR:2463676.2465288}. Figure \ref{fig:sparkstack} illustrates the Apache Spark running on top of Docker, but it can also run standalone. Spark also includes libraries that specialize in special operations such as machine learning or graph-processing.
+Apache Spark\footnote{Apache Spark \url{http://spark.apache.org/}} is a computational platform that is designed to be distributed, fast and general-purpose. It is an extension of the popular MapReduce model \cite{Dean:2008:MSD:1327452.1327492} and it is more efficient when it comes to iterative algorithms as it is able to performs in-memory computations \cite{Xin:2013:SSR:2463676.2465288}. Figure \ref{fig:sparkstack} illustrates the Apache Spark running on top of Docker, but it can also run standalone. Spark comes with specialized libraries for machine learning or graph-processing.
 
 \begin{figure}[ht!]
 \centering
@@ -54,27 +50,24 @@ Apache Spark\footnote{Apache Spark \url{http://spark.apache.org/}} is a computat
 \end{figure}
 
 Spark's computational model consists generally of the following steps:
-
 \begin{description}
   \item[Input-data] Spark is able to fetch its input data from a variety of sources, including Hadoop Distributed File Systems, Amazon S3, Apache Flume, Apache Kafka, Apache HBase or any other Hadoop datasource.
   \item[Transform] Transformations are defined based on the input dataset. Examples of transformations are: mapping the data to another format, joining different datasets or sorting the data in a specific order.
   \item[Aggregate] After the distributed transform of the data, everything is aggregated and loaded into the driver's local memory or it is written to a persistent storage like HDFS.
 \end{description}
 
-Apache Spark works with Resilient Distributed Datasets (RDD), which is a read-only, partitioned collection of records. Each transformation within Spark uses a RDD as input and transforms the data into a new RDD. 
+Apache Spark works with Resilient Distributed Datasets (RDD), which is a read-only, partitioned collection of records. Each transformation within Spark requires a RDD as input and transforms the data into a new immutable RDD. 
 
-Apache Spark will only write to the file-system in a number of situations:
+Apache Spark only writes to the file-system in a number of situations:
 \begin{description}
     \item[Checkpoint] When setting a checkpoint to which it can recover in the event of data loss because one or more machines in the cluster becoming unresponsive as result of a crash or network failure.
-    \item[Memory] Every worker works with a subset of the RDD. When the subset grows to an extent in which is does not fit in the memory anymore, the data will spill to disk.
-    \item[Shuffle] When data needs to be shared across different worker-nodes a shuffle will occur. By designing and implementing an algorithm, these actions should be avoided or kept to an absolute minimum.
+    \item[Memory] Every worker works with a subset of the RDD. When the subset grows to an extent in which is does not fit in the memory anymore, the data spills to disk.
+    \item[Shuffle] When data needs to be shared across different worker-nodes a shuffle occurs. By designing and implementing an algorithm, these actions should be avoided or kept to an absolute minimum.
 \end{description}
 
-An important concept which needs to be taken into account is the number of partitions of an RDD, which is initially set by the source of the RDD. For example, for a \texttt{HadoopRDD} data source, which requests data blocks (64MB by default) from a Hadoop Distributed File System (HDFS), the number of Spark-paritions set to park is equal to the number of blocks \cite{Dean:2008:MSD:1327452.1327492}. This is a convenient way of managing the number of partitions, as this will grow with the volume of the data. In the case of \texttt{KafkaRDD}, which reads from Kafka`s distributed commit log, this is defined by the number of Kafka-partitions in the Kafka-cluster.
+An important concept which needs to be taken into account is the number of partitions of an RDD, which is initially set by the source RDD, for example Kafka, Flume or HDFS. For example, for a \texttt{HadoopRDD} data source, which requests data blocks (64MB by default) from HDFS, the number of Spark-paritions set to the number of blocks \cite{Dean:2008:MSD:1327452.1327492}. This is a convenient way of managing the number of partitions, as this grows with the volume of the data. In the case of \texttt{KafkaRDD}, which reads from Kafka`s distributed commit log, this is defined by the number of Kafka-partitions in the Kafka-cluster which may not always grow.
 
-It is important to be aware of the number of partitions, as it controls the parallelism of the submitted Spark Job. The number of partitions caps the number of tasks which can be executed in parallel. For example, if the RDD only has a single partition, there will be no parallel execution at all.
-
-Spark recommends two or three partitions per CPU core in the cluster\footnote{Apache Spark: Level of Parallelism\url{http://spark.apache.org/docs/latest/tuning.html\#level-of-parallelism}}. This value is heuristically determined and in practice it needs to be tunes to obtain optimal performance as it differs per type of task.
+It is important to be aware of the number of partitions, as it controls the parallelism of the submitted Spark Job. The number of partitions caps the number of processes which can be executed in parallel. For example, if the RDD only has a single partition, there will be no parallel execution at all. Spark recommends two or three partitions per CPU core in the cluster\footnote{Apache Spark: Level of Parallelism\url{http://spark.apache.org/docs/latest/tuning.html\#level-of-parallelism}}. This value is heuristically determined and in practice it needs to be tunes to obtain optimal performance as it differs per type of task.
 
 The Spark Streaming library\footnote{Spark Streaming \url{http://spark.apache.org/streaming/}}, introduced in version 1.2 of Apache Spark, makes it easy to build scalable, fault-tolerant streaming applications. Spark Streaming uses micro-batch semantics, as illustrated in Figure \ref{fig:streaming}.
 
@@ -84,7 +77,7 @@ The Spark Streaming library\footnote{Spark Streaming \url{http://spark.apache.or
 \caption{Spark streaming \label{fig:streaming}}
 \end{figure}
 
-The enabling micro-batched semantics on the continuous stream of observations is done by defining a window as illustrated in Figure \ref{fig:streamingWindow}\footnote{Spark Streaming Guide \url{http://spark.apache.org/docs/latest/streaming-programming-guide.html}}. The window is defined by two parameters:
+The enabling micro-batched semantics on a continuous stream of observations is done by defining a window as illustrated in Figure \ref{fig:streamingWindow}\footnote{Spark Streaming Guide \url{http://spark.apache.org/docs/latest/streaming-programming-guide.html}}. The window is defined by two parameters:
 \begin{description}
   \item[Window length] the duration of the window.
   \item[Sliding interval] the interval at which the window operation is performed.
@@ -96,12 +89,11 @@ The enabling micro-batched semantics on the continuous stream of observations is
 \caption{Applying windowing functions \label{fig:streamingWindow}}
 \end{figure}
 
-Each time the requirement is fullfilled, a new job will be dispatched with the window as input. This streaming concept is particularly well-suited using Apache Kafka as the data source, because it acts as a message queue.
+This enables the window to have an overlap with earlier observations. Each time the requirement is full filled, a new job is dispatched with the window as input. This streaming concept is particularly well-suited using Apache Kafka as the data source, because it acts as a message queue.
 
 \section{Apache Kafka \label{subsec_kafka}}
 
-Apache Kafka\footnote{Apache Kafka \url{http://kafka.apache.org/}} provides functionality of a messaging queue in a distributed, partitioned and replicated messaging fashion. Figure \ref{fig:kafka} illustrates the role of Kafka. First, the terminology will be established, which is analogous to message queues in general:
-
+Apache Kafka\footnote{Apache Kafka \url{http://kafka.apache.org/}} provides functionality of a messaging queue in a distributed, partitioned and replicated way. Figure \ref{fig:kafka} illustrates the role of Kafka. First, the terminology is established, which is analogous to message queues in general:
 \begin{description}
     \item[Broker] is a process running on a machine that together forms the Kafka cluster. 
     \item[Producer] is a process which publishes messages to the Kafka cluster.
@@ -118,7 +110,7 @@ Producers have the role of pushing messages into the log and the consumers read 
 \caption{Apache Kafka high-level topology. \label{fig:kafka}}
 \end{figure}
 
-Apache Kafka is implemented as a distributed commit log, an immutable sequence of messages that is appended as new messages arrive, as illustrated in Figure \ref{fig:kafkalog}. Each message in the partitions is assigned a sequential id-number called by the offset that uniquely identifies each message within the partition. They allow the log to scale beyond a size that will fit on a single server. By default, the partitioning is done in a round-robin fashion, but a partitioning algorithm can be implemented to enhance data-locality. 
+Apache Kafka is implemented as a distributed commit log, an immutable sequence of messages that is appended as new messages arrive, as illustrated in Figure \ref{fig:kafkalog}. Each message in the partitions is assigned a sequential id-number called by the offset that uniquely identifies each message within the partition. They allow the log to scale beyond a size that fits on a single server. By default, the partitioning is done in a round-robin fashion, but a custom partitioning algorithm can be implemented to enhance data-locality. 
 
 \begin{figure}[ht!]
 \centering
@@ -126,9 +118,9 @@ Apache Kafka is implemented as a distributed commit log, an immutable sequence o
 \caption{Anatomy of a topic, implemented as a distributed commit log\label{fig:kafkalog}.}
 \end{figure}
 
-The performance is effectively constant with respect to data size, so retaining lots of data is not a problem within the limitation of fitting a single partition on a single broker. Each partition can be replicated across a configurable number of brokers to ensure fault tolerance and availability of the Kafka cluster.
+The performance is effectively constant with respect to data size, so retaining lots of data is not a problem within the limitation of fitting a single partition on a single broker. Each partition can be replicated across a configurable number of brokers to ensure fault tolerance and availability of the Kafka cluster. 
 
-Apache Kafka allows producers to write arrays of bytes as a record. This means that serializing and deserializing the Scala data structures has to be done by the programmer. This is done in an easy and fast way using the Pickling\footnote{Scala Pickling \url{https://github.com/scala/pickling}} library. 
+Apache Kafka allows producers to write arrays of bytes as a record. This means that serializing and deserializing the Scala data structures has to be done by the programmer. This is done in an easy and fast way using the Pickling\footnote{Scala Pickling \url{https://github.com/scala/pickling}} library which is fast and efficient. 
 
 \section{Apache ZooKeeper \label{subsec_ZooKeeper}}
 
@@ -140,28 +132,22 @@ ZooKeeper\footnote{Apache ZooKeeper \url{https://zookeeper.apache.org/}} is a hi
 \caption{ZooKeeper topology. \label{fig:ZooKeeper}}
 \end{figure}
 
-As depicted in Figure \ref{fig:ZooKeeper}, the ZooKeeper service comprises an ensemble of servers that use replication to achieve high availability and performance. ZooKeeper provides a shared hierarchical namespace which is consistent across all nodes. ZooKeeper runs in memory which ensures high throughput and low latency.
-
-ZooKeeper replicates the namespace across all nodes using a transaction log which ensures that all the mutations are performed by the majority of the ZooKeeper instances in the cluster. The operations on ZooKeeper are wait-free and do not use blocking operations such as locks. This is implemented in the leader-based atomic broadcast protocol named ZooKeeper Atomic Broadcast (ZAB) \cite{zab}, which implements the following guarantees \cite{Hunt:2010}:
-
+As depicted in Figure \ref{fig:ZooKeeper}, the ZooKeeper service comprises an ensemble of servers that use replication to achieve high availability and performance. ZooKeeper provides a shared hierarchical namespace which is consistent across all nodes. ZooKeeper runs in memory which ensures high throughput and low latency. ZooKeeper replicates the namespace across all nodes using a transaction log which ensures that all the mutations are performed by the majority of the ZooKeeper instances in the cluster. The operations on ZooKeeper are wait-free and do not use blocking operations such as locks. This is implemented in the leader-based atomic broadcast protocol named ZooKeeper Atomic Broadcast (ZAB) \cite{zab}, which provides the following guarantees \cite{Hunt:2010}:
 \begin{description} 
     \item[Linearizable writes] all requests that update the state of ZooKeeper are serializable and respect precedence.
     \item[FIFO client order] all requests from a given client are executed in the order in which they were sent by the client.
 \end{description}
 
-As long as a majority of the servers are correct, the ZooKeeper service will be available. With a total of $2f+1$ Zookeeper processes, it is able to tolerate $f$ failures. When the cluster becomes partitioned, from, for example, a network failure, the partitions with a number of processes smaller than $f$ will become available and fall down to an auto-fencing mode, rendering the service unavailable \cite{0201619180}.
+As long as a majority of the servers are correct, the ZooKeeper service will be available. With a total of $2f+1$ Zookeeper processes, it is able to tolerate $f$ failures. When the cluster becomes partitioned, from, for example, a network failure, the partitions with a number of processes smaller than $f$ becomes available and falls down to an auto-fencing mode, rendering the service unavailable \cite{0201619180}. An interesting and useful feature of ZooKeeper are ephemeral nodes. These are nodes in the hierarchical namespace of the ZooKeeper service that will be removed as the process which created them disconnects or becomes unavailable. This enables the ZooKeeper service to only show the list of nodes that are available.
 
-An interesting and useful feature of ZooKeeper are ephemeral nodes. These are nodes in the hierarchical namespace of the ZooKeeper service that will be removed as the process which created them disconnects or becomes unavailable. This enables the ZooKeeper service to only show the list of nodes that are available.
-
-In the software-stack used for the experiment, ZooKeeper is used for:
+In the software-stack used for running the experiment, ZooKeeper is used for:
 \begin{description} 
-    \item[Apache Kafka] a master is elected for each partition within a topic. This is needed in case of a partition being replicated. One master is assigned to which the slaves will follow. If the master dies, a new master gets elected out of the slaves. 
+    \item[Apache Kafka] a master is elected for each partition within a topic. This is needed in case of a partition being replicated. One master is assigned to which the slaves follow. If the master dies, a new master gets elected out of the slaves. 
     \item[Apache Spark] Spark allows to have multiple masters of which only one is active. If the master dies, a standby-master can take over and resubmit the job.
 \end{description}
 
 \section{Software}
-
-The software will be written on top of the architecture as described above. The software will use the Spark Driver to communicate with the cluster. The way this works is illustrated in Figure \ref{fig:driver}. Instead of submitting a packed program to the cluster, the driver tells the worker nodes where the data is and the transformations are serialized and transferred to the worker nodes.
+The software is written on top of the architecture as described above. The software uses the Spark Driver to communicate with the cluster. The way this works is illustrated in Figure \ref{fig:driver}. Instead of submitting a packed program to the cluster, the driver tells the worker nodes where the data is and the transformations are serialized and transferred to the worker nodes.
 
 \begin{figure}[ht!]
 \centering
@@ -169,11 +155,12 @@ The software will be written on top of the architecture as described above. The 
 \caption{Spark context which sends the job to the worker nodes. \label{fig:driver}}
 \end{figure}
 
-The Spark-driver will also be deployed on the server as a Docker container. This will ensure that the driver will run on the same cluster and that network communication between the cluster and the executors will be minimal.
+The Spark-driver is also deployed on the server as a Docker container. This ensures that the driver runs on the same cluster and that network communication between the cluster and the executors is minimal.
 
 The software is built using Simple Build Tool\footnote{Simple Build Tool \url{http://www.scala-sbt.org/}} (SBT) which handles the flow of testing, running and packaging. Using the SBT Assembly plugin \footnote{SBT Assembly \url{https://github.com/sbt/sbt-assembly}}, a JAR file is generated which contains all the sources and the libraries it depends on. Packing specific versions of the dependent libraries into the JAR prevents the need of additional libraries having to be available at run-time.
 
-The source of the algorithm is placed in a GIT\footnote{GIT Version Control \url{https://git-scm.com/}} version control system called Github\footnote{Github \url{https://github.com/rug-ds-lab/SparkOutlierDetection}}, which keeps track of changes to the source code. Github allows the developer to attach hoops to events, such as the push of new code to the repository.
+The source of the algorithm is placed in a GIT\footnote{GIT Version Control \url{https://git-scm.com/}} version control system called Github\footnote{Github \url{https://github.com/rug-ds-lab/SparkOutlierDetection}}, which keeps track of changes to the source code. Github allows the developer to attach hoops to events, such as the push of new code to the repository. The code has been public available for whoever wants to use it.
 
-The continuous-integration server Travis\footnote{Travis CI \url{https://travis-ci.org/rug-ds-lab/SparkOutlierDetection}} is used to build a new version of the software each time a new push is done to the Github repository. The test-coverage of the software is tracked using Codecov\footnote{Codecov \url{https://codecov.io/github/rug-ds-lab/SparkOutlierDetection}}. Using Codecov, the test-coverage is visualized per line of code and gives suggestions as to which files require additional test-coverage.
-Codacy\footnote{Codacy \url{https://www.codacy.com/app/fokko/SparkOutlierDetection}} is used to keep track of the quality of code by performing static analysis. Each time changes are applied, the code is searched for Scala specific code-smells which might incur errors, such as the creation of threads instead of using futures, the use of reserved key-words and high cyclomatic complexity or the use of \texttt{var} instead of the immutable \texttt{val}. 
+The continuous-integration server Travis\footnote{Travis CI \url{https://travis-ci.org/rug-ds-lab/SparkOutlierDetection}} is used to build a new version of the software each time a new push is done to the Github repository. The test-coverage of the software is tracked using Codecov\footnote{Codecov \url{https://codecov.io/github/rug-ds-lab/SparkOutlierDetection}}. Using Codecov, the test-coverage is visualized per line of code, based on that the test coverage can be increased. 
+
+Codacy\footnote{Codacy \url{https://www.codacy.com/app/fokko/SparkOutlierDetection}} is used to keep track of the quality of code by performing static analysis. Each time changes are pushed to GIT, the code is analyzed for Scala specific code-smells which might incur errors, such as the creation of threads instead of using futures, the use of reserved key-words and high cyclomatic complexity or the use of \texttt{var} instead of the immutable \texttt{val}. 
